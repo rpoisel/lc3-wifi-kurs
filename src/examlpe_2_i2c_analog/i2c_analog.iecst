@@ -1,0 +1,13 @@
+PROGRAM Program_I2C_Analog
+	VAR
+		i2c_handle : DINT := -1;
+		analogValues_1 : ARRAY [0..4] OF UINT;
+	END_VAR
+
+	IF i2c_handle < 0 THEN
+		i2c_handle := I2C_open(bus_id := 1);
+	ELSE
+		I2C_I2HAE_read(fd := i2c_handle, address := I2C_ADDRESSES#I2HAE_1, values => analogValues_1);
+		I2C_I2HAA_write(fd := i2c_handle, address := I2C_ADDRESSES#I2HAA_1, values := analogValues_1);
+	END_IF;
+END_PROGRAM

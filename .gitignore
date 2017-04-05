@@ -1,3 +1,10 @@
+# LC3 files
+src-gen/
+target/
+*.launch
+.gdbinit
+.cproject
+
 # Object files
 *.o
 *.ko
