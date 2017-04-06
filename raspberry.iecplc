@@ -9,7 +9,7 @@
 
 CONFIGURATION I2C_Digital_Configuration_Raspberry
 	RESOURCE remote ON Raspbian { ON_CHANNEL := RemoteChannel }
-		TASK DefaultTask(INTERVAL := TIME#500ms, PRIORITY := 38229);
+		TASK DefaultTask(INTERVAL := TIME#50ms, PRIORITY := 38229);
 		PROGRAM Program_I2C_Digital_Instance WITH DefaultTask :
 			Program_I2C_Digital;
 	END_RESOURCE
@@ -17,7 +17,7 @@ END_CONFIGURATION
 
 CONFIGURATION I2C_Analog_Configuration_Raspberry
 	RESOURCE remote ON Raspbian { ON_CHANNEL := RemoteChannel }
-		TASK DefaultTask(INTERVAL := TIME#500ms, PRIORITY := 38229);
+		TASK DefaultTask(INTERVAL := TIME#50ms, PRIORITY := 38229);
 		PROGRAM Program_I2C_Analog_Instance WITH DefaultTask :
 			Program_I2C_Analog;
 	END_RESOURCE
@@ -25,7 +25,7 @@ END_CONFIGURATION
 
 CONFIGURATION MQTT_Receive_Configuration_Raspberry
 	RESOURCE remote ON Raspbian { ON_CHANNEL := RemoteChannel }
-		TASK DefaultTask(INTERVAL := TIME#500ms, PRIORITY := 38229);
+		TASK DefaultTask(INTERVAL := TIME#50ms, PRIORITY := 38229);
 		PROGRAM Program_MQTT_Receive_Instance WITH DefaultTask :
 			Program_MQTT_Receive;
 	END_RESOURCE
@@ -33,8 +33,24 @@ END_CONFIGURATION
 
 CONFIGURATION MQTT_Send_Configuration_Raspberry
 	RESOURCE remote ON Raspbian { ON_CHANNEL := RemoteChannel }
-		TASK DefaultTask(INTERVAL := TIME#500ms, PRIORITY := 38229);
+		TASK DefaultTask(INTERVAL := TIME#50ms, PRIORITY := 38229);
 		PROGRAM Program_MQTT_Send_Instance WITH DefaultTask :
 			Program_MQTT_Send;
+	END_RESOURCE
+END_CONFIGURATION
+
+CONFIGURATION Hysteresis_Configuration_Raspberry
+	RESOURCE remote ON Raspbian { ON_CHANNEL := RemoteChannel }
+		TASK DefaultTask(INTERVAL := TIME#50ms, PRIORITY := 38229);
+		PROGRAM Program_Hysteresis_Instance WITH DefaultTask :
+			Program_Hysteresis;
+	END_RESOURCE
+END_CONFIGURATION
+
+CONFIGURATION Time_Limit_Configuration_Raspberry
+	RESOURCE remote ON Raspbian { ON_CHANNEL := RemoteChannel }
+		TASK DefaultTask(INTERVAL := TIME#50ms, PRIORITY := 38229);
+		PROGRAM Program_Time_Limit_Instance WITH DefaultTask :
+			Program_Time_Limit;
 	END_RESOURCE
 END_CONFIGURATION

@@ -4,6 +4,7 @@ target/
 *.launch
 .gdbinit
 .cproject
+**/*.db
 
 # Object files
 *.o

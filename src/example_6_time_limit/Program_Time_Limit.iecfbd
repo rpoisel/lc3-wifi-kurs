@@ -1,0 +1,165 @@
+PROGRAM Program_Time_Limit
+  VAR
+    i2c_handle : DINT := -1;
+    input_values : ARRAY[0..7] OF BOOL;
+    output_values : ARRAY[0..7] OF BOOL;
+    R_TRIG1 : R_TRIG;
+    TOF1 : TOF;
+    F_TRIG1 : F_TRIG;
+    R_TRIG2 : R_TRIG;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    LT(IN1 := i2c_handle, IN2 := 0, LT => @C(5).LT);
+    I2C_open(EN := @C(5).LT, bus_id := 1, I2C_open => i2c_handle);
+
+    // Network 2:
+    @VF(21) := I2C_ADDRESSES#PCF8574_INPUT_1;
+    GE(IN1 := i2c_handle, IN2 := 0, GE => @C(16).GE);
+    I2C_PCF8574_read(EN := @C(16).GE, fd := i2c_handle, address := @VF(21), I2C_PCF8574_read => input_values);
+
+    // Network 3:
+    R_TRIG1(CLK := input_values[0]);
+    NOT(IN := output_values[0], NOT => @C(39).NOT);
+    SEL(G := R_TRIG1.Q, IN0 := output_values[0], IN1 := @C(39).NOT, SEL => output_values[0]);
+
+    // Network 4:
+    R_TRIG2(CLK := output_values[0]);
+    TOF1(IN := R_TRIG2.Q, PT := T#3s);
+    F_TRIG1(CLK := TOF1.Q);
+    MOVE(EN := F_TRIG1.Q, IN := FALSE, MOVE => output_values[0]);
+
+    // Network 5:
+    @VF(23) := I2C_ADDRESSES#PCF8574_OUTPUT_1;
+    GE(IN1 := i2c_handle, IN2 := 0, GE => @C(27).GE);
+    I2C_PCF8574_write(EN := @C(27).GE, fd := i2c_handle, address := @VF(23), pin_values := output_values);
+
+  *)
+
+  @VF(1) : @E(i2c_handle), @R(150.8, 336.5, 140.0, 19.0);
+  @VF(2) : @E(0), @R(150.8, 356.5, 140.0, 19.0), DINT;
+  @VF(3) : @E(1), @R(146.5, 379.0, 140.0, 19.0), INT;
+  @VF(4) : @E(i2c_handle), @R(804.2, 374.4, 140.0, 19.0);
+  @C(5) : @F(LT), @R(330.8, 336.5, 40.0, 38.0), DINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(LT), @R(9.5));
+  @C(6) : @F(I2C_open), @R(544.2, 354.4, 160.0, 38.5), @I(@N(EN), @L(9.5)), @I(@N(bus_id), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(I2C_open), @R(29.5));
+  @C(12) : @F(I2C_PCF8574_read), @R(530.0, 470.0, 160.0, 58.0), @I(@N(EN), @L(9.5)), @I(@N(fd), @L(29.5)), @I(@N(address), @L(49.5)), @O(@N(ENO), @R(9.5)), @O(@N(I2C_PCF8574_read), @R(29.5));
+  @C(13) : @F(I2C_PCF8574_write), @R(610.0, 890.0, 160.0, 88.0), @I(@N(EN), @L(19.5)), @I(@N(fd), @L(39.5)), @I(@N(address), @L(59.5)), @I(@N(pin_values), @L(79.5)), @O(@N(ENO), @R(19.5));
+  @VF(14) : @E(i2c_handle), @R(150.0, 490.0, 140.0, 19.0);
+  @C(16) : @F(GE), @R(377.3, 444.3, 40.0, 38.0), DINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(GE), @R(9.5));
+  @VF(18) : @E(0), @R(150.0, 470.0, 140.0, 19.0), DINT;
+  @VF(21) : @E(I2C_ADDRESSES#PCF8574_INPUT_1), @R(150.0, 510.0, 140.0, 19.0);
+  @VF(23) : @E(I2C_ADDRESSES#PCF8574_OUTPUT_1), @R(145.6, 936.5, 140.0, 19.0);
+  @VF(25) : @E(i2c_handle), @R(145.6, 916.5, 140.0, 19.0);
+  @C(27) : @F(GE), @R(475.6, 876.5, 40.0, 38.0), DINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(GE), @R(9.5));
+  @VF(30) : @E(0), @R(145.6, 896.5, 140.0, 19.0), DINT;
+  @VF(32) : @E(input_values), @R(790.0, 490.0, 140.0, 19.0);
+  @VF(34) : @E(output_values), @R(145.6, 956.5, 140.0, 19.0);
+  @VF(36) : @E(input_values[0]), @R(150.0, 650.0, 140.0, 19.0);
+  @VF(37) : @E(output_values[0]), @R(840.0, 650.0, 140.0, 19.0);
+  @C(38) : @F(SEL), @R(580.0, 650.0, 120.0, 58.0), BOOL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
+  @C(39) : @F(NOT), @R(320.0, 690.0, 60.0, 18.5), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
+  @VF(41) : @E(output_values[0]), @R(150.0, 690.0, 140.0, 19.0);
+  @VF(43) : @E(output_values[0]), @R(150.0, 670.0, 140.0, 19.0);
+  @C(45) : @FB(R_TRIG1), @R(360.0, 650.0, 140.0, 18.5), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(49) : @FB(TOF1), @R(593.9, 775.9, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
+  @VF(50) : @E(T#3s), @R(150.0, 800.0, 140.0, 19.0);
+  @C(52) : @FB(F_TRIG1), @R(830.0, 780.0, 140.0, 18.5), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @C(54) : @FB(R_TRIG2), @R(380.0, 780.0, 140.0, 18.5), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
+  @VF(56) : @E(output_values[0]), @R(150.0, 780.0, 140.0, 19.0);
+  @VF(58) : @E(output_values[0]), @R(1143.2, 800.1, 140.0, 19.0);
+  @C(60) : @F(MOVE), @R(1030.0, 780.0, 60.0, 38.5), BOOL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
+  @VF(61) : @E(FALSE), @R(830.0, 800.0, 140.0, 19.0), BOOL;
+  @CP(20) : 330.1, 499.5;
+  @CP(31) : 363.4, 926.0;
+
+  @G(7) :
+     @L(@VF(2).o, @C(5).IN2)
+    ;
+  @G(8) :
+     @L(@VF(1).o, @C(5).IN1)
+    ;
+  @G(9) :
+     @L(@VF(3).o, @C(6).bus_id)
+    ;
+  @G(10) :
+     @L(@C(5).LT, @C(6).EN)
+    ;
+  @G(11) :
+     @L(@C(6).I2C_open, @VF(4).i)
+    ;
+  @G(15) :
+     @L(@VF(14).o, @CP(20)),
+     @L(@CP(20), @C(12).fd),
+     @L(@CP(20), @C(16).IN1)
+    ;
+  @G(17) :
+     @L(@C(16).GE, @C(12).EN)
+    ;
+  @G(19) :
+     @L(@VF(18).o, @C(16).IN2)
+    ;
+  @G(22) :
+     @L(@VF(21).o, @C(12).address)
+    ;
+  @G(24) :
+     @L(@VF(23).o, @C(13).address)
+    ;
+  @G(29) :
+     @L(@C(27).GE, @C(13).EN)
+    ;
+  @G(26) :
+     @L(@VF(30).o, @C(27).IN2)
+    ;
+  @G(28) :
+     @L(@VF(25).o, @CP(31)),
+     @L(@CP(31), @C(13).fd),
+     @L(@CP(31), @C(27).IN1)
+    ;
+  @G(33) :
+     @L(@C(12).I2C_PCF8574_read, @VF(32).i)
+    ;
+  @G(35) :
+     @L(@VF(34).o, @C(13).pin_values)
+    ;
+  @G(40) :
+     @L(@C(39).NOT, @C(38).IN1)
+    ;
+  @G(42) :
+     @L(@VF(41).o, @C(39).IN)
+    ;
+  @G(44) :
+     @L(@VF(43).o, @C(38).IN0)
+    ;
+  @G(46) :
+     @L(@VF(36).o, @C(45).CLK)
+    ;
+  @G(47) :
+     @L(@C(45).Q, @C(38).G)
+    ;
+  @G(48) :
+     @L(@C(38).SEL, @VF(37).i)
+    ;
+  @G(51) :
+     @L(@VF(50).o, @C(49).PT)
+    ;
+  @G(53) :
+     @L(@C(49).Q, @C(52).CLK)
+    ;
+  @G(55) :
+     @L(@C(54).Q, @C(49).IN)
+    ;
+  @G(57) :
+     @L(@VF(56).o, @C(54).CLK)
+    ;
+  @G(59) :
+     @L(@C(52).Q, @C(60).EN)
+    ;
+  @G(62) :
+     @L(@VF(61).o, @C(60).IN)
+    ;
+  @G(63) :
+     @L(@C(60).MOVE, @VF(58).i)
+    ;
+END_PROGRAM
