@@ -1,0 +1,61 @@
+PROGRAM Program_Double_Click
+  VAR
+    digital_in : ARRAY[0..7] OF BOOL;
+    digital_out : ARRAY[0..7] OF BOOL;
+    Double_Click_In1 : Double_Click_In;
+    Double_Click_Out1 : Double_Click_Out;
+    Multi_Click1 : Multi_Click;
+  END_VAR
+
+  (*
+
+    // Network 1:
+    Double_Click_In1();
+    digital_in := Double_Click_In1.digital_in;
+
+    // Network 2:
+    Multi_Click1(in := digital_in[0], period := T#500ms, CV := 2);
+    Toggle(in := Multi_Click1.out, value := digital_out[0], out => digital_out[0]);
+
+    // Network 3:
+    Double_Click_Out1(digital_out := digital_out);
+
+  *)
+
+  @C(1) : @FB(Double_Click_In1), @R(200.0, 200.0, 200.0, 80.0), @O(@N(digital_in), @R(9.5));
+  @C(2) : @FB(Double_Click_Out1), @R(420.0, 510.0, 200.0, 80.0), @I(@N(digital_out), @L(9.5));
+  @VF(3) : @E(digital_in), @R(420.0, 200.0, 140.0, 19.0);
+  @VF(5) : @E(digital_out), @R(147.0, 512.3, 140.0, 19.0);
+  @VF(8) : @E(digital_in[0]), @R(210.0, 350.0, 140.0, 19.0);
+  @VF(9) : @E(digital_out[0]), @R(930.0, 350.0, 140.0, 19.0);
+  @VF(10) : @E(T#500ms), @R(210.0, 370.0, 140.0, 19.0);
+  @VF(14) : @E(digital_out[0]), @R(580.0, 370.0, 140.0, 19.0);
+  @VF(22) : @E(2), @R(210.0, 390.0, 140.0, 19.0), INT;
+  @C(7) : @FB(Multi_Click1), @R(440.0, 350.0, 120.0, 130.0), @I(@N(in), @L(9.5)), @I(@N(period), @L(29.5)), @I(@N(CV), @L(49.5)), @O(@N(out), @R(9.5));
+  @C(13) : @F(Toggle), @R(760.0, 350.0, 120.0, 38.0), @I(@N(in), @L(9.5)), @I(@N(value), @L(29.5)), @O(@N(out), @R(9.5));
+
+  @G(4) :
+     @L(@C(1).digital_in, @VF(3).i)
+    ;
+  @G(6) :
+     @L(@VF(5).o, @C(2).digital_out)
+    ;
+  @G(11) :
+     @L(@VF(8).o, @C(7).in)
+    ;
+  @G(12) :
+     @L(@VF(10).o, @C(7).period)
+    ;
+  @G(20) :
+     @L(@VF(22).o, @C(7).CV)
+    ;
+  @G(15) :
+     @L(@C(7).out, @C(13).in)
+    ;
+  @G(16) :
+     @L(@VF(14).o, @C(13).value)
+    ;
+  @G(17) :
+     @L(@C(13).out, @VF(9).i)
+    ;
+END_PROGRAM

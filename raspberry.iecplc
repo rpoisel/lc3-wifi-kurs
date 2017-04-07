@@ -47,10 +47,19 @@ CONFIGURATION Hysteresis_Configuration_Raspberry
 	END_RESOURCE
 END_CONFIGURATION
 
+
 CONFIGURATION Time_Limit_Configuration_Raspberry
 	RESOURCE remote ON Raspbian { ON_CHANNEL := RemoteChannel }
 		TASK DefaultTask(INTERVAL := TIME#50ms, PRIORITY := 38229);
 		PROGRAM Program_Time_Limit_Instance WITH DefaultTask :
 			Program_Time_Limit;
+	END_RESOURCE
+END_CONFIGURATION
+
+CONFIGURATION Double_Click_Configuration_Raspberry
+	RESOURCE remote ON Raspbian { ON_CHANNEL := RemoteChannel }
+		TASK DefaultTask(INTERVAL := TIME#50ms, PRIORITY := 38229);
+		PROGRAM Program_Double_Click_Instance WITH DefaultTask :
+			Program_Double_Click;
 	END_RESOURCE
 END_CONFIGURATION

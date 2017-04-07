@@ -14,3 +14,11 @@ CONFIGURATION Hysteresis_Configuration_Local
 			Program_Hysteresis;
 	END_RESOURCE
 END_CONFIGURATION
+
+CONFIGURATION Double_Click_Configuration_Local
+	RESOURCE local ON BuiltInPlc { ON_CHANNEL := LocalChannel }
+		TASK DefaultTask(INTERVAL := TIME#50ms, PRIORITY := 38229);
+		PROGRAM Program_Double_Click_Instance WITH DefaultTask :
+			Program_Double_Click;
+	END_RESOURCE
+END_CONFIGURATION
