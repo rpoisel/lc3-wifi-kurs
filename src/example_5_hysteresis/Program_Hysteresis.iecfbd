@@ -1,9 +1,9 @@
 PROGRAM Program_Hysteresis
   VAR
-    RS1 : RS;
     i2c_handle : DINT := -1;
     analog_values : ARRAY[0..4] OF UINT;
     digital_values : ARRAY[0..7] OF BOOL;
+    Schmitt_Trigger1 : Schmitt_Trigger;
   END_VAR
   VAR_OUTPUT
     digital_output : BOOL;
@@ -21,10 +21,8 @@ PROGRAM Program_Hysteresis
     I2C_I2HAE_read(EN := @C(28).GE, fd := i2c_handle, address := @VF(43), values => analog_values);
 
     // Network 3:
-    LT(IN1 := analog_values[0], IN2 := 300, LT => @C(5).LT);
-    GT(IN1 := analog_values[0], IN2 := 700, GT => @C(6).GT);
-    RS1(S := @C(5).LT, R1 := @C(6).GT);
-    digital_values[0] := RS1.Q1;
+    Schmitt_Trigger1(in := analog_values[0], low := 300, high := 700);
+    digital_values[0] := Schmitt_Trigger1.out;
 
     // Network 4:
     @VF(41) := I2C_ADDRESSES#PCF8574_OUTPUT_1;
@@ -33,11 +31,8 @@ PROGRAM Program_Hysteresis
 
   *)
 
-  @C(2) : @FB(RS1), @R(570.0, 540.0, 80.0, 38.0), @I(@N(S), @L(9.5)), @I(@N(R1), @L(29.5)), @O(@N(Q1), @R(9.5));
-  @C(5) : @F(LT), @R(309.9, 540.0, 40.0, 38.0), UINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(LT), @R(9.5));
-  @C(6) : @F(GT), @R(309.9, 620.0, 40.0, 38.0), UINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(GT), @R(9.5));
-  @VF(9) : @E(300), @R(99.9, 560.0, 140.0, 19.0), UINT;
-  @VF(10) : @E(700), @R(99.9, 640.0, 140.0, 19.0), UINT;
+  @VF(9) : @E(300), @R(99.9, 560.0, 140.0, 19.0), DINT;
+  @VF(10) : @E(700), @R(99.9, 579.6, 140.0, 19.0), DINT;
   @VF(16) : @E(i2c_handle), @R(90.0, 300.0, 140.0, 19.0);
   @C(18) : @F(I2C_open), @R(487.8, 190.0, 160.0, 38.5), @I(@N(EN), @L(9.5)), @I(@N(bus_id), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(I2C_open), @R(29.5));
   @VF(21) : @E(i2c_handle), @R(89.7, 100.4, 140.0, 19.0);
@@ -48,9 +43,9 @@ PROGRAM Program_Hysteresis
   @VF(31) : @E(0), @R(90.0, 320.0, 140.0, 19.0), DINT;
   @C(29) : @F(I2C_I2HAE_read), @R(490.0, 320.0, 150.0, 140.0), @I(@N(EN), @L(9.5)), @I(@N(fd), @L(29.5)), @I(@N(address), @L(49.5)), @O(@N(ENO), @R(9.5)), @O(@N(values), @R(29.5));
   @VF(1) : @E(analog_values), @R(750.0, 340.0, 140.0, 19.0);
-  @VF(37) : @E(analog_values[0]), @R(99.9, 540.0, 140.0, 19.0);
+  @VF(37) : @E(analog_values[0]), @R(99.9, 540.0, 170.0, 19.0);
   @C(38) : @F(I2C_PCF8574_write), @R(510.0, 830.0, 160.0, 88.0), @I(@N(EN), @L(19.5)), @I(@N(fd), @L(39.5)), @I(@N(address), @L(59.5)), @I(@N(pin_values), @L(79.5)), @O(@N(ENO), @R(19.5));
-  @VF(39) : @E(digital_values[0]), @R(780.0, 540.0, 140.0, 19.0);
+  @VF(39) : @E(digital_values[0]), @R(750.0, 540.0, 170.0, 19.0);
   @VF(4) : @E(digital_values), @R(110.0, 900.0, 140.0, 19.0);
   @VF(41) : @E(I2C_ADDRESSES#PCF8574_OUTPUT_1), @R(110.0, 880.0, 140.0, 19.0);
   @VF(43) : @E(I2C_ADDRESSES#I2HAE_1), @R(90.0, 360.0, 140.0, 19.0);
@@ -58,22 +53,10 @@ PROGRAM Program_Hysteresis
   @C(45) : @F(GE), @R(360.0, 820.0, 40.0, 38.0), DINT, @I(@N(IN1), @L(9.5)), @I(@N(IN2), @L(29.5)), @O(@N(GE), @R(9.5));
   @VF(46) : @E(0), @R(110.0, 840.0, 140.0, 19.0), DINT;
   @VF(19) : @E(1), @R(90.0, 210.0, 140.0, 19.0), INT;
+  @C(3) : @FB(Schmitt_Trigger1), @R(460.0, 540.0, 120.0, 160.0), @I(@N(in), @L(9.5)), @I(@N(low), @L(29.5)), @I(@N(high), @L(49.5)), @O(@N(out), @R(9.5));
   @CP(33) : 251.0, 309.5;
-  @CP(14) : 257.1, 549.5;
   @CP(48) : 292.6, 869.5;
 
-  @G(7) :
-     @L(@C(5).LT, @C(2).S)
-    ;
-  @G(8) :
-     @L(@C(6).GT, @C(2).R1)
-    ;
-  @G(11) :
-     @L(@VF(9).o, @C(5).IN2)
-    ;
-  @G(12) :
-     @L(@VF(10).o, @C(6).IN2)
-    ;
   @G(24) :
      @L(@VF(23).o, @C(22).IN2)
     ;
@@ -100,14 +83,6 @@ PROGRAM Program_Hysteresis
   @G(36) :
      @L(@C(29).values, @VF(1).i)
     ;
-  @G(13) :
-     @L(@VF(37).o, @CP(14)),
-     @L(@CP(14), @C(5).IN1),
-     @L(@CP(14), @C(6).IN1)
-    ;
-  @G(3) :
-     @L(@C(2).Q1, @VF(39).i)
-    ;
   @G(40) :
      @L(@VF(4).o, @C(38).pin_values)
     ;
@@ -130,5 +105,17 @@ PROGRAM Program_Hysteresis
     ;
   @G(20) :
      @L(@VF(19).o, @C(18).bus_id)
+    ;
+  @G(2) :
+     @L(@VF(37).o, @C(3).in)
+    ;
+  @G(5) :
+     @L(@VF(9).o, @C(3).low)
+    ;
+  @G(6) :
+     @L(@VF(10).o, @C(3).high)
+    ;
+  @G(7) :
+     @L(@C(3).out, @VF(39).i)
     ;
 END_PROGRAM
