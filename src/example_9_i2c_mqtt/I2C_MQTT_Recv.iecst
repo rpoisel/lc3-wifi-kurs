@@ -1,0 +1,54 @@
+PROGRAM Program_I2C_MQTT_Recv
+    VAR
+        mqtt_handle : DINT := -1;
+        mqtt_ioImageRemote : ARRAY[0..1023] OF BYTE;
+        mqtt_ioImageRemoteLen : DINT := 1;
+        mqtt_rc : DINT := -1;
+        mqtt_state : SINT := -1;
+        mqtt_subscribed : BOOL;
+        mqtt_topic : STRING[255];
+        
+        i2c_handle : DINT := -1;
+    END_VAR
+
+    ENO := TRUE;
+
+    mqtt_state := MQTT_GetState(ch := mqtt_handle, rc => mqtt_rc, ENO => ENO);
+    /* make sure MQTT connection is established and messages are received */
+    IF mqtt_state <> 5 /* connecting */ AND mqtt_state <> 6 /* connected */ THEN
+        mqtt_handle := MQTT_Connect(address := '10.1.111.208', clientId := 'RTS1', rc => mqtt_rc, ENO => ENO);
+    END_IF;
+
+	IF i2c_handle < 0 THEN
+		i2c_handle := I2C_open(bus_id := 1);
+	END_IF;
+     
+    IF ENO AND mqtt_state = 6 /* connected */ THEN
+    	IF NOT(mqtt_subscribed) THEN
+			MQTT_Subscribe(ch := mqtt_handle, topic := 'bath', rc => mqtt_rc);
+            mqtt_subscribed := mqtt_rc = 0; /* MQTT_RC_OK */
+    	END_IF;
+
+		IF mqtt_subscribed THEN
+	        REPEAT
+                MQTT_Receive(ch := mqtt_handle,
+                                payload := REF(mqtt_ioImageRemote[0]),
+                                payload_len := TO_DINT(SIZEOF(mqtt_ioImageRemote)),
+                                len => mqtt_ioImageRemoteLen,
+                                topic => mqtt_topic,
+                                rc => mqtt_rc);
+                IF mqtt_rc <> 0 /* RTSS_MQTT_OK */ THEN
+                    EXIT;
+                END_IF;
+			    IF i2c_handle >= 0 THEN
+			        /* prepare data to be transfered over MQTT */
+			        I2C_PCF8574_write(fd := i2c_handle, address := 16#20, pin_values := CONVERT_BYTE_TO_ARR(mqtt_ioImageRemote[0]));
+			    END_IF;
+            UNTIL TRUE
+            END_REPEAT;
+		END_IF;
+	ELSE
+		mqtt_subscribed := FALSE;
+    END_IF;
+
+END_PROGRAM

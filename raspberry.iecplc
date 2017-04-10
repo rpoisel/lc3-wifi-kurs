@@ -63,3 +63,27 @@ CONFIGURATION Double_Click_Configuration_Raspberry
 			Program_Double_Click;
 	END_RESOURCE
 END_CONFIGURATION
+
+CONFIGURATION PID_Test_Configuration_Raspberry
+	RESOURCE remote ON Raspbian { ON_CHANNEL := RemoteChannel }
+		TASK DefaultTask(INTERVAL := TIME#50ms, PRIORITY := 38229);
+		PROGRAM Program_PID_Test_Instance WITH DefaultTask :
+			Program_PID_Test;
+	END_RESOURCE
+END_CONFIGURATION
+
+CONFIGURATION I2C_MQTT_Send_Configuration_Raspberry
+	RESOURCE remote ON Raspbian { ON_CHANNEL := RemoteChannel }
+		TASK DefaultTask(INTERVAL := TIME#50ms, PRIORITY := 38229);
+		PROGRAM Program_I2C_MQTT_Send_Instance WITH DefaultTask :
+			Program_I2C_MQTT_Send;
+	END_RESOURCE
+END_CONFIGURATION
+
+CONFIGURATION I2C_MQTT_Recv_Configuration_Raspberry
+	RESOURCE remote ON Raspbian { ON_CHANNEL := RemoteChannel }
+		TASK DefaultTask(INTERVAL := TIME#50ms, PRIORITY := 38229);
+		PROGRAM Program_I2C_MQTT_Recv_Instance WITH DefaultTask :
+			Program_I2C_MQTT_Recv;
+	END_RESOURCE
+END_CONFIGURATION
