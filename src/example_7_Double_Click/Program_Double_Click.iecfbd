@@ -4,7 +4,7 @@ PROGRAM Program_Double_Click
     digital_out : ARRAY[0..7] OF BOOL;
     Double_Click_In1 : Double_Click_In;
     Double_Click_Out1 : Double_Click_Out;
-    Multi_Click1 : Multi_Click;
+    Double_Click1 : Double_Click;
   END_VAR
 
   (*
@@ -14,8 +14,8 @@ PROGRAM Program_Double_Click
     digital_in := Double_Click_In1.digital_in;
 
     // Network 2:
-    Multi_Click1(in := digital_in[0], CV := 2, period := T#500ms);
-    NOT(EN := Multi_Click1.out, IN := digital_out[0], NOT => digital_out[0]);
+    Double_Click1(in := digital_in[0], period := T#300ms);
+    NOT(EN := Double_Click1.out, IN := digital_out[0], NOT => digital_out[0]);
 
     // Network 3:
     Double_Click_Out1(digital_out := digital_out);
@@ -26,13 +26,12 @@ PROGRAM Program_Double_Click
   @C(2) : @FB(Double_Click_Out1), @R(440.0, 560.0, 200.0, 80.0), @I(@N(digital_out), @L(9.5));
   @VF(3) : @E(digital_in), @R(420.0, 200.0, 140.0, 19.0);
   @VF(5) : @E(digital_out), @R(167.0, 562.3, 140.0, 19.0);
-  @VF(10) : @E(T#500ms), @R(210.0, 400.0, 140.0, 19.0);
-  @VF(22) : @E(2), @R(210.4, 372.2, 140.0, 19.0), INT;
-  @C(18) : @F(NOT), @R(780.0, 350.0, 60.0, 38.5), BOOL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(NOT), @R(29.5));
-  @C(7) : @FB(Multi_Click1), @R(420.0, 350.0, 120.0, 150.0), @I(@N(in), @L(9.5)), @I(@N(CV), @L(29.5)), @I(@N(period), @L(49.5)), @O(@N(out), @R(9.5));
+  @VF(10) : @E(T#300ms), @R(210.0, 370.0, 140.0, 19.0);
+  @C(18) : @F(NOT), @R(740.0, 350.0, 60.0, 38.5), BOOL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(NOT), @R(29.5));
   @VF(8) : @E(digital_in[0]), @R(210.0, 350.0, 140.0, 19.0);
-  @VF(12) : @E(digital_out[0]), @R(600.0, 370.0, 140.0, 19.0);
-  @VF(13) : @E(digital_out[0]), @R(890.0, 370.0, 140.0, 19.0);
+  @VF(12) : @E(digital_out[0]), @R(580.0, 370.0, 140.0, 19.0);
+  @VF(13) : @E(digital_out[0]), @R(860.0, 370.0, 140.0, 19.0);
+  @C(11) : @FB(Double_Click1), @R(430.0, 350.0, 120.0, 120.0), @I(@N(in), @L(9.5)), @I(@N(period), @L(29.5)), @O(@N(out), @R(9.5));
 
   @G(4) :
      @L(@C(1).digital_in, @VF(3).i)
@@ -40,22 +39,19 @@ PROGRAM Program_Double_Click
   @G(6) :
      @L(@VF(5).o, @C(2).digital_out)
     ;
-  @G(11) :
-     @L(@C(7).out, @C(18).EN)
+  @G(15) :
+     @L(@VF(10).o, @C(11).period)
     ;
-  @G(9) :
-     @L(@C(18).NOT, @VF(13).i)
+  @G(16) :
+     @L(@C(11).out, @C(18).EN)
+    ;
+  @G(7) :
+     @L(@VF(8).o, @C(11).in)
     ;
   @G(14) :
      @L(@VF(12).o, @C(18).IN)
     ;
-  @G(15) :
-     @L(@VF(8).o, @C(7).in)
-    ;
-  @G(16) :
-     @L(@VF(22).o, @C(7).CV)
-    ;
-  @G(17) :
-     @L(@VF(10).o, @C(7).period)
+  @G(9) :
+     @L(@C(18).NOT, @VF(13).i)
     ;
 END_PROGRAM
