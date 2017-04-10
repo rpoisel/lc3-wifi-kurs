@@ -22,8 +22,7 @@ PROGRAM Program_Time_Limit
 
     // Network 3:
     R_TRIG1(CLK := input_values[0]);
-    NOT(IN := output_values[0], NOT => @C(39).NOT);
-    SEL(G := R_TRIG1.Q, IN0 := output_values[0], IN1 := @C(39).NOT, SEL => output_values[0]);
+    NOT(EN := R_TRIG1.Q, IN := output_values[0], NOT => output_values[0]);
 
     // Network 4:
     R_TRIG2(CLK := output_values[0]);
@@ -57,18 +56,16 @@ PROGRAM Program_Time_Limit
   @VF(32) : @E(input_values), @R(790.0, 490.0, 140.0, 19.0);
   @VF(34) : @E(output_values), @R(145.6, 956.5, 140.0, 19.0);
   @VF(36) : @E(input_values[0]), @R(150.0, 650.0, 140.0, 19.0);
-  @VF(37) : @E(output_values[0]), @R(840.0, 650.0, 140.0, 19.0);
-  @C(38) : @F(SEL), @R(580.0, 650.0, 120.0, 58.0), BOOL, @I(@N(G), @L(9.5)), @I(@N(IN0), @L(29.5)), @I(@N(IN1), @L(49.5)), @O(@N(SEL), @R(9.5));
-  @C(39) : @F(NOT), @R(320.0, 690.0, 60.0, 18.5), BOOL, @I(@N(IN), @L(9.5)), @O(@N(NOT), @R(9.5));
-  @VF(41) : @E(output_values[0]), @R(150.0, 690.0, 140.0, 19.0);
-  @VF(43) : @E(output_values[0]), @R(150.0, 670.0, 140.0, 19.0);
+  @VF(37) : @E(output_values[0]), @R(790.0, 670.0, 160.0, 19.0);
+  @C(39) : @F(NOT), @R(591.0, 653.0, 60.0, 38.0), BOOL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(NOT), @R(29.5));
+  @VF(43) : @E(output_values[0]), @R(150.0, 670.0, 160.0, 19.0);
   @C(45) : @FB(R_TRIG1), @R(360.0, 650.0, 140.0, 18.5), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
   @C(49) : @FB(TOF1), @R(593.9, 775.9, 100.0, 38.0), @I(@N(IN), @L(9.5)), @I(@N(PT), @L(29.5)), @O(@N(Q), @R(9.5)), @O(@N(ET), @R(29.5));
   @VF(50) : @E(T#3s), @R(150.0, 800.0, 140.0, 19.0);
   @C(52) : @FB(F_TRIG1), @R(830.0, 780.0, 140.0, 18.5), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
   @C(54) : @FB(R_TRIG2), @R(380.0, 780.0, 140.0, 18.5), @I(@N(CLK), @L(9.5)), @O(@N(Q), @R(9.5));
-  @VF(56) : @E(output_values[0]), @R(150.0, 780.0, 140.0, 19.0);
-  @VF(58) : @E(output_values[0]), @R(1143.2, 800.1, 140.0, 19.0);
+  @VF(56) : @E(output_values[0]), @R(150.0, 780.0, 160.0, 19.0);
+  @VF(58) : @E(output_values[0]), @R(1133.2, 800.1, 150.0, 19.0);
   @C(60) : @F(MOVE), @R(1030.0, 780.0, 60.0, 38.5), BOOL, @I(@N(EN), @L(9.5)), @I(@N(IN), @L(29.5)), @O(@N(ENO), @R(9.5)), @O(@N(MOVE), @R(29.5));
   @VF(61) : @E(FALSE), @R(830.0, 800.0, 140.0, 19.0), BOOL;
   @CP(20) : 330.1, 499.5;
@@ -123,23 +120,8 @@ PROGRAM Program_Time_Limit
   @G(35) :
      @L(@VF(34).o, @C(13).pin_values)
     ;
-  @G(40) :
-     @L(@C(39).NOT, @C(38).IN1)
-    ;
-  @G(42) :
-     @L(@VF(41).o, @C(39).IN)
-    ;
-  @G(44) :
-     @L(@VF(43).o, @C(38).IN0)
-    ;
   @G(46) :
      @L(@VF(36).o, @C(45).CLK)
-    ;
-  @G(47) :
-     @L(@C(45).Q, @C(38).G)
-    ;
-  @G(48) :
-     @L(@C(38).SEL, @VF(37).i)
     ;
   @G(51) :
      @L(@VF(50).o, @C(49).PT)
@@ -161,5 +143,14 @@ PROGRAM Program_Time_Limit
     ;
   @G(63) :
      @L(@C(60).MOVE, @VF(58).i)
+    ;
+  @G(38) :
+     @L(@C(45).Q, @C(39).EN)
+    ;
+  @G(40) :
+     @L(@C(39).NOT, @VF(37).i)
+    ;
+  @G(42) :
+     @L(@VF(43).o, @C(39).IN)
     ;
 END_PROGRAM
