@@ -3,30 +3,29 @@ PROGRAM Program_I2C_MQTT_Recv
 		mqtt_handle : DINT := -1;
 		mqtt_ioImageRemote : ARRAY[0..1023] OF BYTE;
 		mqtt_ioImageRemoteLen : DINT := 1;
-		mqtt_rc : DINT := -1;
-		mqtt_state : SINT := -1;
+		mqtt_state : MQTT_SUBSCRIBER_STATE := MQTT_SUBSCRIBER_STATE#INVALID;
 		mqtt_subscribed : BOOL;
-		mqtt_topic : STRING[255];
+		mqtt_retval : MQTT_RC;
 
 		i2c_handle : DINT := -1;
 	END_VAR
 
 	ENO := TRUE;
 
-	mqtt_state := MQTT_GetState(ch := mqtt_handle, rc => mqtt_rc, ENO => ENO);
+	mqtt_state := MQTT_GetState(ch := mqtt_handle, rc => mqtt_retval, ENO => ENO);
 	/* make sure MQTT connection is established and messages are received */
-	IF mqtt_state <> 5 /* connecting */ AND mqtt_state <> 6 /* connected */ THEN
-		mqtt_handle := MQTT_Connect(address := '10.1.111.208', clientId := 'RTS1', rc => mqtt_rc, ENO => ENO);
+	IF mqtt_state <> MQTT_SUBSCRIBER_STATE#CONNECTING AND mqtt_state <> MQTT_SUBSCRIBER_STATE#CONNECTED THEN
+		mqtt_handle := MQTT_Connect(address := '10.1.111.208', clientId := 'RTS1', rc => mqtt_retval, ENO => ENO);
 	END_IF;
 
 	IF i2c_handle < 0 THEN
 		i2c_handle := I2C_open(bus_id := 1);
 	END_IF;
 
-	IF ENO AND mqtt_state = 6 /* connected */ THEN
+	IF ENO AND mqtt_state = MQTT_SUBSCRIBER_STATE#CONNECTED THEN
 		IF NOT(mqtt_subscribed) THEN
-			MQTT_Subscribe(ch := mqtt_handle, topic := 'bath', rc => mqtt_rc);
-			mqtt_subscribed := mqtt_rc = 0; /* MQTT_RC_OK */
+			MQTT_Subscribe(ch := mqtt_handle, topic := MQTT_TOPICS#BATH, rc => mqtt_retval);
+			mqtt_subscribed := mqtt_retval = MQTT_RC#OK;
 		END_IF;
 
 		IF mqtt_subscribed THEN
@@ -35,9 +34,8 @@ PROGRAM Program_I2C_MQTT_Recv
 								payload := REF(mqtt_ioImageRemote[0]),
 								payload_len := TO_DINT(SIZEOF(mqtt_ioImageRemote)),
 								len => mqtt_ioImageRemoteLen,
-								topic => mqtt_topic,
-								rc => mqtt_rc);
-				IF mqtt_rc <> 0 /* RTSS_MQTT_OK */ THEN
+								rc => mqtt_retval);
+				IF mqtt_retval <> MQTT_RC#OK THEN
 					EXIT;
 				END_IF;
 				IF i2c_handle >= 0 THEN

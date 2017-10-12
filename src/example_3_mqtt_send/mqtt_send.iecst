@@ -1,16 +1,16 @@
 PROGRAM Program_MQTT_Send
 	VAR
-		mqtt_state : MQTT_STATE := MQTT_STATE#INVALID;
-		mqtt_rc : DINT := -1;
+		mqtt_state : MQTT_SUBSCRIBER_STATE := MQTT_SUBSCRIBER_STATE#INVALID;
+		mqtt_retval : MQTT_RC := MQTT_RC#ERROR;
 		mqtt_handle : DINT := -1;
 		mqtt_payload : ARRAY [0..0] OF BYTE := [ MQTT_VALUE#DUMMY ];
 	END_VAR
 
-	mqtt_state := MQTT_GetState(ch := mqtt_handle, rc => mqtt_rc, ENO => ENO);
-	IF mqtt_state <> MQTT_STATE#CONNECTING AND mqtt_state <> MQTT_STATE#CONNECTED THEN
+	mqtt_state := MQTT_GetState(ch := mqtt_handle, rc => mqtt_retval, ENO => ENO);
+	IF mqtt_state <> MQTT_SUBSCRIBER_STATE#CONNECTING AND mqtt_state <> MQTT_SUBSCRIBER_STATE#CONNECTED THEN
 		mqtt_handle := MQTT_CONNECT(address := MQTT_BROKER#LOCALHOST, clientId := MQTT_CLIENTID#OG_WRITE, ENO => ENO);
 	END_IF;
-	IF ENO and mqtt_state = MQTT_STATE#CONNECTED THEN
-		MQTT_Publish(ch := mqtt_handle, topic := MQTT_TOPICS#KITCHEN, payload := REF(mqtt_payload[0]), len := TO_DINT(SIZEOF(mqtt_payload)), rc => mqtt_rc);
+	IF ENO and mqtt_state = MQTT_SUBSCRIBER_STATE#CONNECTED THEN
+		MQTT_Publish(ch := mqtt_handle, topic := MQTT_TOPICS#KITCHEN, payload := REF(mqtt_payload[0]), len := TO_DINT(SIZEOF(mqtt_payload)), rc => mqtt_retval);
 	END_IF;
 END_PROGRAM

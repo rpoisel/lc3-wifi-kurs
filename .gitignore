@@ -5,6 +5,7 @@ target/
 .gdbinit
 .cproject
 **/*.db
+.settings/
 
 # Object files
 *.o

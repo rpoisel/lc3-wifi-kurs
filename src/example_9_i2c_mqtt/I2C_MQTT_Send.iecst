@@ -3,8 +3,8 @@ PROGRAM Program_I2C_MQTT_Send
 		mqtt_handle : DINT := -1;
 		mqtt_ioImageLocal : ARRAY[0..1023] OF BYTE;
 		mqtt_ioImageLocalLen : DINT := 1;
-		mqtt_rc : DINT := -1;
-		mqtt_state : SINT := -1;
+		mqtt_retval : MQTT_RC := MQTT_RC#ERROR;
+		mqtt_state : MQTT_SUBSCRIBER_STATE := MQTT_SUBSCRIBER_STATE#INVALID;
 
 		i2c_handle : DINT := -1;
 		i2c_di_1 : ARRAY[0..7] OF BOOL; /* digital inputs */
@@ -12,24 +12,24 @@ PROGRAM Program_I2C_MQTT_Send
 
 	ENO := TRUE;
 
-	mqtt_state := MQTT_GetState(ch := mqtt_handle, rc => mqtt_rc, ENO => ENO);
+	mqtt_state := MQTT_GetState(ch := mqtt_handle, rc => mqtt_retval, ENO => ENO);
 	/* make sure MQTT connection is established and messages are received */
-	IF mqtt_state <> 5 /* connecting */ AND mqtt_state <> 6 /* connected */ THEN
-		mqtt_handle := MQTT_Connect(address := '10.1.111.208', clientId := 'RTS1', rc => mqtt_rc, ENO => ENO);
+	IF mqtt_state <> MQTT_SUBSCRIBER_STATE#CONNECTING AND mqtt_state <> MQTT_SUBSCRIBER_STATE#CONNECTED THEN
+		mqtt_handle := MQTT_Connect(address := '10.1.111.208', clientId := 'RTS1', rc => mqtt_retval, ENO => ENO);
 	END_IF;
 
 	IF i2c_handle < 0 THEN
 		i2c_handle := I2C_open(bus_id := 1);
 	END_IF;
 
-	IF ENO AND mqtt_state = 6 /* connected */ AND i2c_handle >= 0 THEN
+	IF ENO AND mqtt_state = MQTT_SUBSCRIBER_STATE#CONNECTED AND i2c_handle >= 0 THEN
 		i2c_di_1 := I2C_PCF8574_read(fd := i2c_handle, address := 16#38);
 		/* prepare data to be transfered over MQTT */
 		mqtt_ioImageLocal[0] := CONVERT_ARR_TO_BYTE(in := i2c_di_1);
 		/* send updated io image to remote */
-		MQTT_Publish(ch := mqtt_handle, topic := 'bad',
+		MQTT_Publish(ch := mqtt_handle, topic := MQTT_TOPICS#BATH,
 						payload := REF(mqtt_ioImageLocal[0]),
 						len := mqtt_ioImageLocalLen,
-						rc => mqtt_rc);
+						rc => mqtt_retval);
 	END_IF;
 END_PROGRAM

@@ -1,7 +1,7 @@
 PROGRAM Program_MQTT_Receive
 	VAR
-		mqtt_state : MQTT_STATE := MQTT_STATE#INVALID;
-		mqtt_rc : DINT;
+		mqtt_state : MQTT_SUBSCRIBER_STATE := MQTT_SUBSCRIBER_STATE#INVALID;
+		mqtt_retval : MQTT_RC := MQTT_RC#ERROR;
 		mqtt_handle : DINT := -1;
 		mqtt_subscribed : BOOL;
 		mqtt_payload : ARRAY [0..0] OF BYTE;
@@ -9,18 +9,18 @@ PROGRAM Program_MQTT_Receive
 	END_VAR
 
 	mqtt_state := MQTT_GetState(ch := mqtt_handle);
-	IF mqtt_state <> MQTT_STATE#CONNECTING AND mqtt_state <> MQTT_STATE#CONNECTED THEN
+	IF mqtt_state <> MQTT_SUBSCRIBER_STATE#CONNECTING AND mqtt_state <> MQTT_SUBSCRIBER_STATE#CONNECTED THEN
 		mqtt_handle := MQTT_Connect(address := MQTT_BROKER#LOCALHOST, clientId := MQTT_CLIENTID#OG_READ);
 	END_IF;
 
-	IF mqtt_state = MQTT_STATE#CONNECTED THEN
+	IF mqtt_state = MQTT_SUBSCRIBER_STATE#CONNECTED THEN
 		IF NOT mqtt_subscribed THEN
-			MQTT_Subscribe(ch := mqtt_handle, topic := MQTT_TOPICS#BATH, rc => mqtt_rc);
-			mqtt_subscribed := mqtt_rc = MQTT_RC#OK;
+			MQTT_Subscribe(ch := mqtt_handle, topic := MQTT_TOPICS#BATH, rc => mqtt_retval);
+			mqtt_subscribed := mqtt_retval = MQTT_RC#OK;
 		END_IF;
 		IF mqtt_subscribed THEN
-			MQTT_Receive(ch := mqtt_handle, payload := REF(mqtt_payload[0]), payload_len := TO_DINT(SIZEOF(mqtt_payload)), len => mqtt_payload_len_received, rc => mqtt_rc);
-			ENO := mqtt_rc = MQTT_RC#OK;
+			MQTT_Receive(ch := mqtt_handle, payload := REF(mqtt_payload[0]), payload_len := TO_DINT(SIZEOF(mqtt_payload)), len => mqtt_payload_len_received, rc => mqtt_retval);
+			ENO := mqtt_retval = MQTT_RC#OK;
 		END_IF;
 	ELSE
 		mqtt_subscribed := FALSE;
